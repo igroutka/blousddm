@@ -2,6 +2,11 @@ import { useState } from "react";
 import { NavBar } from "@/components/NavBar";
 import { AdminNewsForm } from "@/components/AdminNewsForm";
 import { AdminNewsList } from "@/components/AdminNewsList";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 interface NewsItem {
   title: string;
@@ -36,6 +41,11 @@ const Admin = () => {
     }
   ]);
 
+  const [showAccessDialog, setShowAccessDialog] = useState(true);
+  const [accessCode, setAccessCode] = useState("");
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   const handleAddNews = (newNews: Omit<NewsItem, "date">) => {
     setNews([
       {
@@ -49,6 +59,49 @@ const Admin = () => {
   const handleDeleteNews = (index: number) => {
     setNews(news.filter((_, i) => i !== index));
   };
+
+  const handleAccessCodeSubmit = () => {
+    if (accessCode === "789456123") {
+      setShowAccessDialog(false);
+      toast({
+        title: "Доступ разрешен",
+        description: "Добро пожаловать в админ-панель",
+      });
+    } else {
+      toast({
+        title: "Ошибка",
+        description: "Неверный код доступа",
+        variant: "destructive",
+      });
+      navigate("/");
+    }
+  };
+
+  if (showAccessDialog) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800">
+        <NavBar />
+        <Dialog open={showAccessDialog} onOpenChange={setShowAccessDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Введите код доступа</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input
+                type="password"
+                placeholder="Код доступа"
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value)}
+              />
+              <Button onClick={handleAccessCodeSubmit} className="w-full">
+                Войти
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800">
